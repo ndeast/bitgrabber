@@ -2,6 +2,7 @@
 
 import requests
 import time
+import threading
 from bs4 import BeautifulSoup
 from datetime import datetime
 
@@ -17,22 +18,25 @@ btcStringList = []
 def collector():
     r = requests.get("https://poloniex.com/public?command=returnOrderBook&currencyPair=USDT_BTC&depth=50")
     soup = BeautifulSoup(r.content, "html.parser")
-    btcString = soup.text
+    btcString = soup.text + ""
     btcStringList.append(btcString)
 
 def main():
     for i in range(collections):
+        print("list length is: " + str(len(btcStringList)))
         collector()
         print(i)
-        if len(btcStringList) % amountToWrite:
+        if len(btcStringList) == amountToWrite:
             writeToFile()
         time.sleep(sleepTime)
 
 def writeToFile():
-    with open(filename, 'w') as f:
+    print("writing to file")
+    with open(filename, 'a') as f:
         for i in range(len(btcStringList)):
             f.write(btcStringList[i] + "\n")
     f.close()
+    btcStringList.clear()
 
 if __name__ == '__main__':
     main()
